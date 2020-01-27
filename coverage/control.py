@@ -721,18 +721,6 @@ class Coverage(object):
             self.stop()
         if self._auto_save:
             self.save()
-            lcov_filename = os.environ.get('PYTHON_LCOV_FILE')
-            if lcov_filename:
-                try:
-                    with open(lcov_filename, 'w') as lcov_file:
-                        try:
-                            self.annotate(lcov_file=lcov_file,
-                                          ignore_errors=True)
-                        except CoverageException as e:
-                            coverage_log('Coverage error %s'% e)
-                except IOError as e:
-                    coverage_log('Error (%s) creating lcov file %s' %
-                                (e.strerror, lcov_filename))
 
     def erase(self):
         """Erase previously-collected coverage data.
@@ -797,7 +785,21 @@ class Coverage(object):
         """Save the collected coverage data to the data file."""
         self._init()
         self.get_data()
-        self.data_files.write(self.data, suffix=self.data_suffix)
+        lcov_filename = os.environ.get('PYTHON_LCOV_FILE')
+        if lcov_filename:
+            try:
+                with open(lcov_filename, 'w') as lcov_file:
+                    try:
+                        self.annotate(lcov_file=lcov_file,
+                                      ignore_errors=True)
+                    except CoverageException as e:
+                        coverage_log('Coverage error %s'% e)
+            except IOError as e:
+                coverage_log('Error (%s) creating lcov file %s' %
+                            (e.strerror, lcov_filename))
+        else:
+            self.data_files.write(self.data, suffix=self.data_suffix)
+
 
     def combine(self, data_paths=None, strict=False):
         """Combine together a number of similarly-named coverage data files.
