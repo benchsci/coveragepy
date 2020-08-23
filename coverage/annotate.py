@@ -116,8 +116,8 @@ class AnnotateReporter(Reporter):
         missing = sorted(analysis.missing)
         excluded = sorted(analysis.excluded)
 
-        if lcov_file:
-            lcov_file.write("SF:%s\n" % filename)
+        if lcov_file:            
+            lcov_file.write("SF:%s\n" % filename.replace(os.environ["PWD"], '').lstrip("/"))
 
         if self.directory:
             dest_file = os.path.join(self.directory, flat_rootname(fr.relative_filename()))
